@@ -82,7 +82,9 @@ template <class RandomIt> void sort(RandomIt first, RandomIt last) {
 */
 // Кастомный swap, будет найдена автоматически при вызове std::swap для CollectingValue
 template <typename T>
-void swap(CollectingValue<T>& a, CollectingValue<T>& b)
+// Добавлен noexcept для swap,
+// так как clang-tidy требует безопасный swap без выброса исключений.
+void swap(CollectingValue<T>& a, CollectingValue<T>& b) noexcept
 {
     CollectingValue<T>::swaps++;
     std::swap(a.value, b.value);

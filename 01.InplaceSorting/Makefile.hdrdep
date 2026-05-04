@@ -1,1 +1,5 @@
 
+# DO NOT DELETE
+
+sort_demo.o: collvalue.h sorting.h
+sort_test.o: sorting.h collvalue.h
