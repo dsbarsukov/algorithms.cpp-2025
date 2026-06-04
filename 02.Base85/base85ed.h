@@ -1,5 +1,5 @@
-#ifndef __BASE85ED__
-#define __BASE85ED__
+#ifndef BASE85ED_H
+#define BASE85ED_H
 
 #include <vector>
 #include <cstdint>
@@ -34,4 +34,4 @@ std::vector<uint8_t> decode(std::vector<uint8_t> const &b85str); // TODO: add @t
 
 } // namespace base85
 
-#endif // __BASE85ED__
+#endif // BASE85ED_H

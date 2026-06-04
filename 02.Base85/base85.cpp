@@ -1,13 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
-#include <functional>
+#include <cstring>
+#include <exception>
 
 #include "base85ed.h"
 
 std::vector<uint8_t> read_stdin_to_vector_iostream()
 {
-    constexpr std::streamsize BUF_SIZE = 64 * 1024;
+    constexpr std::streamsize BUF_SIZE = static_cast<std::streamsize>(64) * 1024;
     std::vector<uint8_t> out;
     out.reserve(1024);
     std::vector<char> buf(BUF_SIZE);
@@ -41,7 +42,7 @@ void write_vector_to_stdout(const std::vector<uint8_t>& data)
 
     if (!data.empty())
     {
-        std::cout.write(reinterpret_cast<const char*>(data.data()), data.size());
+        std::cout.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
     }
     // flush to ensure data is written out
     std::cout.flush();
@@ -50,33 +51,39 @@ void write_vector_to_stdout(const std::vector<uint8_t>& data)
 
 int main(int argc, const char *argv[])
 {
-    if (argc != 2)
+    try
     {
-        std::cerr << "Use -e or -d argument\n";
-        return 1;
-    }
-    else
-    {
-        std::function<std::vector<uint8_t>(const std::vector<uint8_t>&)> func = nullptr;
-        std::string a = argv[1];
-        if (a == "--encode" || a == "-e")
+        if (argc != 2)
         {
-            func = base85::encode;
-        }
-        else if (a == "--decode" || a == "-d")
-        {
-            func = base85::decode;
+            std::cerr << "Use -e or -d argument\n";
+            return 1;
         }
         else
         {
-            std::cerr << "Don't know how to deal with <" << a << ">, use -e or -d\n";
-            return 1;
+            const char *a = argv[1];
+            auto data = read_stdin_to_vector_iostream();
+
+            if (std::strcmp(a, "--encode") == 0 || std::strcmp(a, "-e") == 0)
+            {
+                auto result = base85::encode(data);
+                write_vector_to_stdout(result);
+            }
+            else if (std::strcmp(a, "--decode") == 0 || std::strcmp(a, "-d") == 0)
+            {
+                auto result = base85::decode(data);
+                write_vector_to_stdout(result);
+            }
+            else
+            {
+                std::cerr << "Don't know how to deal with <" << a << ">, use -e or -d\n";
+                return 1;
+            }
         }
 
-        auto data = read_stdin_to_vector_iostream();
-        auto result = func(data);
-        write_vector_to_stdout(result);
+        return 0;
     }
-
-    return 0;
+    catch (const std::exception &e)
+    {
+        return 1;
+    }
 }
